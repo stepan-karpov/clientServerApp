@@ -58,12 +58,12 @@ func submitHandler(w http.ResponseWriter, r *http.Request) {
 	db.WriteSubmission(common.DB_FILE_PATH, clientIP, current_experiment_number, bodyInt)
 	ui.OutputQueries(current_experiment_number)
 
-	if bodyInt == current_experiment_number {
-		fmt.Fprintln(w, fmt.Sprint("Hoourray!! You won!!", string(body)))
+	if bodyInt == currrent_guessed_number {
+		fmt.Fprintln(w, "Hoourray!! You won!!")
 	} else if bodyInt < currrent_guessed_number {
-		fmt.Fprintln(w, "Value " + string(body) + " less than expected")
-    } else {
-      fmt.Fprintln(w, "Value " + string(body) + " more than expected")
+		fmt.Fprintln(w, "Value "+string(body)+" less than expected")
+	} else {
+		fmt.Fprintln(w, "Value "+string(body)+" more than expected")
 	}
 }
 
@@ -80,7 +80,21 @@ func WaitUntilExperimentStarts() {
 	}
 }
 
+func WaitUntilSubscriptionStarts() {
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		input, _ := reader.ReadString('\n')
+		if input == "yes\n" {
+			InitializeSubscriptionState()
+			return
+		} else {
+			ui.OutputQueries(current_experiment_number)
+		}
+	}
+}
+
 func InitializeSubscriptionState() {
+	current_experiment_number += 1
 	current_state.Store(common.SUBSCRIPTION_STATE)
 	ui.OutputRegisteredStats()
 	go WaitUntilExperimentStarts()
@@ -90,6 +104,7 @@ func InitializeExperimentState() {
 	current_state.Store(common.EXPERIMENT_STATE)
 	currrent_guessed_number = 1234
 	ui.OutputQueries(current_experiment_number)
+	go WaitUntilSubscriptionStarts()
 }
 
 func main() {

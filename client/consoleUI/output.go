@@ -20,8 +20,10 @@ func clearTerminal() {
 	}
 }
 
-func OutputWaitRegistration() {
-	clearTerminal()
+func OutputWaitRegistration(already_won bool) {
+	if !already_won {
+		clearTerminal()
+	}
 	fmt.Println("Please, wait until registration starts!!")
 }
 

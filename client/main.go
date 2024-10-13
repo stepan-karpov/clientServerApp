@@ -58,7 +58,7 @@ func WaitExperimentStart() {
 	WaitUntilStateHappens(common.EXPERIMENT_STATE)
 }
 
-func InitializeGuessProcess() {
+func InitializeGuessProcess() bool {
   ui.OutputGuessInterface()
 	var guessed bool = false
 	reader := bufio.NewReader(os.Stdin)
@@ -75,16 +75,27 @@ func InitializeGuessProcess() {
 		resp, _ := http.Post("http://localhost:8080/submit", "text/plain", requestBody)
     logs.LogInfo("Query request sent")
 		body, _ := io.ReadAll(resp.Body)
+    
+    if string(body) == "Hoourray!! You won!!\n" {
+      guessed = true
+      break
+    } else {
+      ui.OutputGuessResult(string(body))
+      ui.OutputWaitQueryResponse()
+    }
 
-		ui.OutputGuessResult(string(body))
 	}
 	ui.OutputWaitRegistrationAgain(guessed)
+  return guessed
 }
 
 func main() {
-	ui.OutputWaitRegistration()
-	TryToSubscribe()
-	ui.OutputRegistrationComplete()
-	WaitExperimentStart()
-	InitializeGuessProcess()
+  already_won := false 
+  for {
+    ui.OutputWaitRegistration(already_won)
+    TryToSubscribe()
+    ui.OutputRegistrationComplete()
+    WaitExperimentStart()
+    already_won = InitializeGuessProcess()
+  }
 }
