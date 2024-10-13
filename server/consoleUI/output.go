@@ -54,12 +54,12 @@ func OutputQueries(experiment_number int) {
 	}
 
 	fmt.Println("Registered Subscriptions:")
-	fmt.Printf("%-5s %-15s %-20s\n", "Query ID", "IP", "Query Value")
+	fmt.Printf("%-15s %-15s %-15s\n", "Query ID", "IP", "Query Value")
 	fmt.Println(strings.Repeat("-", 42))
 
 	for _, subscription := range queriesInfo {
 		if subscription.ExperimentNumber == experiment_number {
-			fmt.Printf("%-5d %-15s %-20d\n", subscription.ID, subscription.IP, subscription.QueryValue)
+			fmt.Printf("%-15d %-15s %-15d\n", subscription.ID, subscription.IP, subscription.QueryValue)
 
 		}
 	}

@@ -102,6 +102,7 @@ func InitializeSubscriptionState() {
 
 func InitializeExperimentState() {
 	current_state.Store(common.EXPERIMENT_STATE)
+	// currrent_guessed_number = rand.Intn(common.MAX_VALUE - common.MIN_VALUE + 1) + common.MIN_VALUE
 	currrent_guessed_number = 1234
 	ui.OutputQueries(current_experiment_number)
 	go WaitUntilSubscriptionStarts()
