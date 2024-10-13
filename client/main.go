@@ -1,29 +1,63 @@
 package main
 
 import (
- "fmt"
- "io/ioutil"
- "net/http"
- "time"
+	"fmt"
+	"io"
+	ui "main/client/consoleUI"
+	logs "main/client/logs_writer"
+	common "main/common"
+	"net/http"
+	"time"
 )
 
-func main() {
- for {
-  resp, err := http.Get("http://localhost:8080/hello")
-  if err != nil {
-   fmt.Println("Ошибка при выполнении запроса:", err)
-  } else {
-   // Чтение ответа
-   body, err := ioutil.ReadAll(resp.Body)
-   if err != nil {
-    fmt.Println("Ошибка при чтении ответа:", err)
-   } else {
-    fmt.Printf("Ответ сервера: %s\n", string(body))
-   }
-   resp.Body.Close()
-  }
+func WaitUntilStateHappens(state string) {
+  for {
+		resp, err := http.Get("http://localhost:8080/polling_state")
 
-  // Ждем 1 секунду перед следующим запросом
-  time.Sleep(1 * time.Second)
- }
+		if err != nil {
+			logs.LogError(fmt.Sprint("Error while polling state request:", err))
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			logs.LogError(fmt.Sprint("Error while response parsing:", err))
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		if string(body) != state {
+			resp.Body.Close()
+			continue
+		}
+    return
+
+		// Polling interval is 1 second
+		time.Sleep(1 * time.Second)
+	}
+}
+
+func Register() {
+  _, err := http.Get("http://localhost:8080/subscribe")
+
+  if err != nil {
+    logs.LogError(fmt.Sprint("Error while registrating client", err))
+  }
+}
+
+func TryToSubscribe() {
+	WaitUntilStateHappens(common.SUBSCRIPTION_STATE)
+  Register()
+}
+
+func WaitExperimentStart() {
+  WaitUntilStateHappens(common.EXPERIMENT_STATE)
+}
+
+func main() {
+  ui.OutputWaitRegistration()
+  TryToSubscribe()
+  ui.OutputRegistrationComplete()
+  WaitExperimentStart()
 }
