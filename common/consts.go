@@ -8,3 +8,6 @@ const DB_FILE_PATH = "data/experiments_data.db"
 
 const	SUBSCRIPTION_STATE = "SUBSCRIPTION_STATE"
 const	EXPERIMENT_STATE   = "EXPERIMENT_STATE"
+
+const MIN_VALUE int = 0
+const MAX_VALUE int = 1000000

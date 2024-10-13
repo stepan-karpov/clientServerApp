@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func OutputRegisteredStats() {
+func clearTerminal() {
 	switch runtime.GOOS {
 	case "windows":
 		cmd := exec.Command("cmd", "/c", "cls")
@@ -21,6 +21,10 @@ func OutputRegisteredStats() {
 		cmd.Stdout = os.Stdout
 		cmd.Run()
 	}
+}
+
+func OutputRegisteredStats() {
+	clearTerminal()
 
 	subscriptionsInfo, err := db.GetAllSubscriptions(common.DB_FILE_PATH)
 	if err != nil {
@@ -38,4 +42,29 @@ func OutputRegisteredStats() {
 
 	fmt.Printf("\nDo you want to start an experiment? (yes/no)\n\n")
 	fmt.Printf("Your input is: ")
+}
+
+func OutputQueries(experiment_number int) {
+	clearTerminal()
+
+	queriesInfo, err := db.GetQueriesInfo(common.DB_FILE_PATH)
+	if err != nil {
+		fmt.Println("Error retrieving queries:", err)
+		return
+	}
+
+	fmt.Println("Registered Subscriptions:")
+	fmt.Printf("%-5s %-15s %-20s\n", "Query ID", "IP", "Query Value")
+	fmt.Println(strings.Repeat("-", 42))
+
+	for _, subscription := range queriesInfo {
+		if subscription.ExperimentNumber == experiment_number {
+			fmt.Printf("%-5d %-15s %-20d\n", subscription.ID, subscription.IP, subscription.QueryValue)
+
+		}
+	}
+
+	fmt.Printf("\nDo you want to finish an experiment? (yes/no)\n\n")
+	fmt.Printf("Your input is: ")
+
 }

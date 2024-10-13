@@ -44,6 +44,27 @@ func SubscribeUser(dbPath string, ip string, experiment_number int) error {
 	return nil
 }
 
+func WriteSubmission(dbPath string, ip string, experiment_number int, query_value int) error {
+
+	database, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return fmt.Errorf("error while connecting to database: %w", err)
+	}
+	defer database.Close()
+
+	insertUserSQL := `
+	INSERT INTO queries (experiment_number, ip, query_value) 
+	VALUES (?, ?, ?);`
+
+	_, err = database.Exec(insertUserSQL, experiment_number, ip, query_value)
+	if err != nil {
+		return fmt.Errorf("error while inserting user: %w", err)
+	}
+
+	logs.LogInfo(fmt.Sprintf("Query added %s successfully", ip))
+	return nil
+}
+
 type Subscription struct {
  ID               int
  IP               string
@@ -79,3 +100,41 @@ func GetAllSubscriptions(dbPath string) ([]Subscription, error) {
 
  return subscriptions, nil
 }
+
+type Query struct {
+	ID               int
+	ExperimentNumber int
+	IP               string
+	QueryValue 			 int
+}
+
+func GetQueriesInfo(dbPath string) ([]Query, error) {
+	database, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+	 return nil, fmt.Errorf("error while connecting to database: %w", err)
+	}
+	defer database.Close()
+ 
+	rows, err := database.Query("SELECT id, experiment_number, ip, query_value FROM queries;")
+	if err != nil {
+	 return nil, fmt.Errorf("error while retrieving queries: %w", err)
+	}
+	defer rows.Close()
+ 
+	var queries []Query
+ 
+	for rows.Next() {
+	 var query Query
+	 if err := rows.Scan(&query.ID, &query.ExperimentNumber, &query.IP, &query.QueryValue); err != nil {
+		return nil, fmt.Errorf("error while scanning query: %w", err)
+	 }
+	 queries = append(queries, query)
+	}
+ 
+	if err := rows.Err(); err != nil {
+	 return nil, fmt.Errorf("error occurred during row iteration: %w", err)
+	}
+ 
+	return queries, nil
+ }
+ 
