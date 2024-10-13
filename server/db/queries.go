@@ -102,7 +102,7 @@ func GetAllSubscriptions(dbPath string) ([]Subscription, error) {
 }
 
 type Query struct {
-	ID               int
+  ID               int
 	ExperimentNumber int
 	IP               string
 	QueryValue 			 int
@@ -136,5 +136,39 @@ func GetQueriesInfo(dbPath string) ([]Query, error) {
 	}
  
 	return queries, nil
+ }
+ 
+
+ type Experiment struct {
+	ID              int
+	MeanValue       float64
+	NumberOfQueries int
+ }
+ 
+ func GetExperimentsInfo(dbPath string) ([]Experiment, error) {
+	queriesInfo, err := GetQueriesInfo(dbPath)
+	if err != nil {
+	 return nil, err
+	}
+ 
+	experimentStats := make(map[int]*Experiment)
+ 
+	for _, query := range queriesInfo {
+	 experiment, exists := experimentStats[query.ExperimentNumber]
+	 if !exists {
+		experiment = &Experiment{ID: query.ExperimentNumber}
+		experimentStats[query.ExperimentNumber] = experiment
+	 }
+	 experiment.MeanValue += float64(query.QueryValue)
+	 experiment.NumberOfQueries++
+	}
+ 
+	var experiments []Experiment
+	for _, experiment := range experimentStats {
+	 experiment.MeanValue /= float64(experiment.NumberOfQueries)
+	 experiments = append(experiments, *experiment)
+	}
+ 
+	return experiments, nil
  }
  

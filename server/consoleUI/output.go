@@ -23,8 +23,27 @@ func clearTerminal() {
 	}
 }
 
+func OutputExperimentInfo() {
+	queriesInfo, err := db.GetExperimentsInfo(common.DB_FILE_PATH)
+	if err != nil {
+		fmt.Println("Error retrieving queries:", err)
+		return
+	}
+
+	fmt.Println("Registered Subscriptions:")
+	fmt.Printf("%-15s %-15s %-15s\n", "ID", "NumberOfQueries", "MeanValue")
+	fmt.Println(strings.Repeat("-", 42))
+	
+	for _, experiment := range queriesInfo {
+		fmt.Printf("%-15d %-15d %-15f\n", experiment.ID, experiment.NumberOfQueries, experiment.MeanValue)
+	}
+
+	fmt.Println(strings.Repeat("\n", 10))
+}
+
 func OutputRegisteredStats() {
 	clearTerminal()
+	OutputExperimentInfo()
 
 	subscriptionsInfo, err := db.GetAllSubscriptions(common.DB_FILE_PATH)
 	if err != nil {
@@ -46,6 +65,7 @@ func OutputRegisteredStats() {
 
 func OutputQueries(experiment_number int) {
 	clearTerminal()
+	OutputExperimentInfo()
 
 	queriesInfo, err := db.GetQueriesInfo(common.DB_FILE_PATH)
 	if err != nil {
@@ -57,14 +77,13 @@ func OutputQueries(experiment_number int) {
 	fmt.Printf("%-15s %-15s %-15s\n", "Query ID", "IP", "Query Value")
 	fmt.Println(strings.Repeat("-", 42))
 
-	for _, subscription := range queriesInfo {
-		if subscription.ExperimentNumber == experiment_number {
-			fmt.Printf("%-15d %-15s %-15d\n", subscription.ID, subscription.IP, subscription.QueryValue)
+	for _, query := range queriesInfo {
+		if query.ExperimentNumber == experiment_number {
+			fmt.Printf("%-15d %-15s %-15d\n", query.ID, query.IP, query.QueryValue)
 
 		}
 	}
 
 	fmt.Printf("\nDo you want to finish an experiment? (yes/no)\n\n")
 	fmt.Printf("Your input is: ")
-
 }
