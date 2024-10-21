@@ -1,7 +1,4 @@
-# 1C-department-selection
-
-Карпов Степан Константинович
-Задача No4 / Системное программирование
+# clientServerApp
 
 Miro с архитектурой приложения: https://miro.com/app/board/uXjVLTLLCas=/
 
